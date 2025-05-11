@@ -86,8 +86,17 @@ endfunction
 function byte uart_model::decode(bit [9:0] out);
     byte data;
 
-    for(int i= 0 ; i < 8; i++) begin
-        data[i] = out[i + 1]; // only tx_data
+    for(int i= 0 ; i < 10; i++) begin
+        if(i == 0) begin
+            assert (out[i] == 0) 
+            else  `uvm_error("uart_model", $sformatf("start bit is not 0!"));
+        end            
+        else if(i == 9) begin
+            assert (out[i] == 1) 
+            else  `uvm_error("uart_model", $sformatf("stop bit is not 1!"));
+        end            
+        else
+            data[i - 1] = out[i]; // only tx_data
     end
 
     return data;
