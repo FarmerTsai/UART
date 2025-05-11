@@ -1,13 +1,12 @@
 module uart_rx(
     input clk,
     input rst_n,
-    //input parity_mode, // 0: even, 1: odd
     input uart_rxd, // receive pin
 
     output reg [7:0] rx_data, // receive data
     output reg rx_ready // receive finish
-    //output reg parity_error // 0: parity pass, 1: parity error
 );
+
 // clk parameter
 //parameter BAUD_RATE = 9600;
 //parameter CLK_FREQ = 50000000; // 50MHZ
@@ -105,43 +104,13 @@ end
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n) begin
         rx_data <= 0;
-        //parity_bit <= 0;
     end
     else if(cur_state == RECEIVE && count == DIV/2 - 1) begin
         // bit_cnt start with 0
         if(bit_cnt < 8)
             rx_data[bit_cnt] <= uart_rxd;
-        /*else if(bit_cnt == 8)
-            parity_bit <= uart_rxd;*/
     end
 end
-
-// expected parity bit
-/*wire exp_parity;
-assign exp_parity = parity_mode? ~^rx_data:^rx_data;
-always @(posedge clk or negedge rst_n) begin
-    if(!rst_n)
-        parity_error <= 0;
-    else if(cur_state == STOP && count == DIV - 1)
-        parity_error <= (exp_parity != parity_bit); 
-end*/
-
-// finish receive, handshake for future
-/*reg [3:0] rx_ready_cnt; // to hold rx_ready
-always @(posedge clk or negedge rst_n) begin
-    if(!rst_n) begin
-        rx_ready <= 0;
-        rx_ready_cnt <= 0;
-    end
-    else if (cur_state == STOP && count == DIV - 1 && uart_rxd == 1'b1) begin // check stop bit
-        rx_ready <= 1;
-        rx_ready_cnt <= DIV - 1;
-    end
-    else if (rx_ready_cnt > 0)
-        rx_ready_cnt <= rx_ready_cnt - 1;
-    else
-        rx_ready <= 0;
-end*/
 
 // finish receive
 always @(posedge clk or negedge rst_n) begin

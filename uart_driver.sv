@@ -48,7 +48,6 @@ task uart_driver::run_phase(uvm_phase phase);
             tx_if.tx_data <= tx_req.tx_data;
             //tx_if.tx_data <= tx_if.tx_data << 1; // for error test
             tx_if.tx_en <= 1;
-            //tx_if.parity_mode <= tx_req.parity_mode;
 
             @(posedge tx_if.clk);
             tx_if.tx_en <= 0;
@@ -72,7 +71,6 @@ task uart_driver::run_phase(uvm_phase phase);
             @(posedge rx_if.clk);
             rx_if.tx_data <= rx_req.tx_data;
             rx_if.tx_en <= 1;
-            //rx_if.parity_mode <= rx_req.parity_mode;
 
             @(posedge rx_if.clk);
             rx_if.tx_en <= 0;

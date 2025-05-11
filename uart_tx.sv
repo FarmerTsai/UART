@@ -2,13 +2,13 @@
 module uart_tx (
     input clk, // system clock
     input rst_n, // asynchronous active low reset
-    //input parity_mode, // 0: even, 1: odd
     input tx_en,
     input [7:0] tx_data,
 
     output reg uart_txd, // uart transmittion data
     output reg tx_done // pull high when tx_data is send finish
 );
+
 // clk parameter
 //parameter BAUD_RATE = 9600;
 //parameter CLK_FREQ = 50000000; // 50MHZ
@@ -59,7 +59,7 @@ always@(*) begin
         end
         SEND:begin
             //$display("FSM is in SEND state");
-            if(bit_cnt == 7 && count == DIV - 1) // add parity bit
+            if(bit_cnt == 7 && count == DIV - 1)
                 next_state = STOP;
             else
                 next_state = SEND;
@@ -98,10 +98,6 @@ always @(posedge clk or negedge rst_n) begin
         bit_cnt <= 0;
 end
 
-// count parity
-/*wire parity_bit;
-assign parity_bit = (parity_mode)? ~^tx_data:^tx_data;*/
-
 // send data
 always @(posedge clk or negedge rst_n) begin
     if(!rst_n)
@@ -117,8 +113,6 @@ always @(posedge clk or negedge rst_n) begin
             SEND: begin
                 if(bit_cnt < 8)
                     uart_txd <= tx_data[bit_cnt];
-                /*else if(bit_cnt == 8)
-                    uart_txd <= parity_bit;*/
                 else
                     uart_txd <= 1;
             end
@@ -129,23 +123,6 @@ always @(posedge clk or negedge rst_n) begin
         endcase
     end
 end
-
-// pull up tx_done when send data finish
-/*reg [3:0] tx_done_cnt;
-always @(posedge clk or negedge rst_n) begin
-    if(!rst_n) begin
-        tx_done <= 1'b0;
-        tx_done_cnt <= 0;
-    end
-    else if(cur_state == STOP && count == DIV - 1) begin
-        tx_done <= 1'b1;
-        tx_done_cnt <= DIV - 1;
-    end
-    else if(tx_done_cnt > 0)
-        tx_done_cnt <= tx_done_cnt - 1;
-    else
-        tx_done <= 1'b0; 
-end*/
 
 // pull up tx_done when send data finish
 always @(posedge clk or negedge rst_n) begin

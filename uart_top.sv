@@ -34,7 +34,6 @@ module tb_uart_top;
         .uart_rxd(tx_if.uart_rxd),
         .rx_data(tx_if.rx_data),
         .rx_ready(tx_if.rx_ready)
-        //.parity_mode(tx_if.parity_mode)
     );
 
     uart dut_rx(
@@ -46,7 +45,6 @@ module tb_uart_top;
         .uart_rxd(rx_if.uart_rxd),
         .rx_data(rx_if.rx_data),
         .rx_ready(rx_if.rx_ready)
-        //.parity_mode(rx_if.parity_mode)
     );
 
     // connect two dut

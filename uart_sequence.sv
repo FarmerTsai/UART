@@ -29,7 +29,6 @@ class uart_sequence extends uvm_sequence #(uart_trans);
                 if(!utrans.randomize())
                     `uvm_error("uart_sequence", "Randomize failed!");
             end
-            //utrans.parity_mode = $urandom_range(0, 1);
 
             start_item(utrans);
             finish_item(utrans);
