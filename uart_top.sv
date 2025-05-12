@@ -5,6 +5,7 @@ import uvm_pkg::*;
 `include "uart_interface.sv"
 `include "uart_transaction.sv"
 `include "uart_basic_sequence.sv"
+`include "uart_corner_sequence.sv"
 `include "uart_sequencer.sv"
 `include "uart_driver.sv"
 `include "uart_monitor.sv"
@@ -17,6 +18,7 @@ import uvm_pkg::*;
 `include "uart_env_top.sv"
 `include "uart_base_test.sv"
 `include "uart_basic_test.sv"
+`include "uart_corner_test.sv"
 
 module tb_uart_top; 
   
@@ -94,7 +96,7 @@ module tb_uart_top;
 
         
         // start test
-        run_test("uart_basic_test");
+        run_test("uart_corner_test");
     end
 
 endmodule
