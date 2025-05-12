@@ -15,7 +15,7 @@ class uart_env_b extends uvm_env;
 
     	i_agt = uart_agent::type_id::create("i_agt", this);
 		i_agt.is_active = UVM_ACTIVE;
-		i_agt.is_tx = 0;
+		i_agt.is_a = 0;
 
 		o_agt = uart_agent::type_id::create("o_agt", this);
 		o_agt.is_active = UVM_PASSIVE;

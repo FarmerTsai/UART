@@ -6,7 +6,7 @@ class uart_driver extends uvm_driver #(uart_trans);
     virtual uart_if a_if;
     virtual uart_if b_if;
 
-    bit is_tx;
+    bit is_a;
     reg [7:0] data;
     int no_transactions;
 
@@ -26,8 +26,8 @@ class uart_driver extends uvm_driver #(uart_trans);
         if(!uvm_config_db #(virtual uart_if)::get(this, "", "b_if", b_if))begin
             `uvm_fatal("uart_driver", "virtual interface must be set for b_if!");
         end
-        if(!uvm_config_db #(bit)::get(this, "", "is_tx", is_tx))begin
-            `uvm_fatal("uart_driver", "virtual interface must be set for is_tx!");
+        if(!uvm_config_db #(bit)::get(this, "", "is_a", is_a))begin
+            `uvm_fatal("uart_driver", "virtual interface must be set for is_a!");
         end
     endfunction
 
@@ -38,8 +38,8 @@ task uart_driver::run_phase(uvm_phase phase);
     uart_trans a_req, b_req;
 
     // env_a
-    if(is_tx) begin
-        `uvm_info(get_full_name(), $sformatf("is_tx = %0d", is_tx), UVM_MEDIUM);
+    if(is_a) begin
+        `uvm_info(get_full_name(), $sformatf("is_a = %0d", is_a), UVM_MEDIUM);
         // reset
         a_if.rst_n <= 0;
         @(posedge a_if.clk);
@@ -75,8 +75,8 @@ task uart_driver::run_phase(uvm_phase phase);
     end
 
     // env_b
-    else if(!is_tx) begin
-        `uvm_info(get_full_name(), $sformatf("is_tx = %0d", is_tx), UVM_MEDIUM);
+    else if(!is_a) begin
+        `uvm_info(get_full_name(), $sformatf("is_a = %0d", is_a), UVM_MEDIUM);
         // reset
         b_if.rst_n <= 0;
         @(posedge b_if.clk);
@@ -90,11 +90,11 @@ task uart_driver::run_phase(uvm_phase phase);
             b_if.tx_data <= b_req.tx_data;
             b_if.tx_en <= 1;
 
-            if(a_req.do_reset == 1) begin
-                repeat(10) @(posedge a_if.clk); // wait transmission begin
-                a_if.rst_n <= 0;
-                @(posedge a_if.clk);
-                a_if.rst_n <= 1;
+            if(b_req.do_reset == 1) begin
+                repeat(10) @(posedge b_if.clk); // wait transmission begin
+                b_if.rst_n <= 0;
+                @(posedge b_if.clk);
+                b_if.rst_n <= 1;
             end
 
             @(posedge b_if.clk);

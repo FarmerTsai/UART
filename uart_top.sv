@@ -25,7 +25,6 @@ import uvm_pkg::*;
 module tb_uart_top; 
   
     reg clk;
-    reg rst_n;
   
     uart_if a_if(.clk(clk));
     uart_if b_if(.clk(clk));

@@ -5,7 +5,7 @@ class uart_agent extends uvm_agent;
     uart_driver    drv;
     uart_mon mon;
 
-    bit is_tx; // 1, is env_tx: 0, is env_rx
+    bit is_a; // 1, is env_a: 0, is env_b
 
     uvm_analysis_port #(uart_trans) ap_port;
 
@@ -18,7 +18,7 @@ class uart_agent extends uvm_agent;
     function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
 
-        uvm_config_db #(bit)::set(this, "drv", "is_tx", is_tx);
+        uvm_config_db #(bit)::set(this, "drv", "is_a", is_a);
 
         if(is_active == UVM_ACTIVE) begin
             sqr = uart_sequencer::type_id::create("sqr", this);
