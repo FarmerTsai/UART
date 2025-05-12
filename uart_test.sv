@@ -22,16 +22,16 @@ class uart_test extends uvm_test;
 			begin
 				// sequence for env_a
 				a_seq = uart_sequence::type_id::create("a_seq");
-    			if(!a_seq.randomize()) 
-    				`uvm_error("", "Randomize failed")
+    			/*if(!a_seq.randomize()) // random should in sequence
+    				`uvm_error("", "Randomize failed")*/
     			a_seq.starting_phase = phase;
     			a_seq.start(env_top.env_a.i_agt.sqr);
 			end
 			begin
 				// sequence for env_b
 				b_seq = uart_sequence::type_id::create("b_seq");
-    			if( !b_seq.randomize() ) 
-    				`uvm_error("", "Randomize failed")
+    			/*if( !b_seq.randomize() ) 
+    				`uvm_error("", "Randomize failed")*/
     			b_seq.starting_phase = phase;
     			b_seq.start(env_top.env_b.i_agt.sqr);
 			end
