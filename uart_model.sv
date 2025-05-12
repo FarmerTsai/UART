@@ -7,10 +7,11 @@ Brief: A basic model to mimic the behavior of the UART DUT
 class uart_model extends uvm_component;
     `uvm_component_utils(uart_model);
 
-    uvm_blocking_get_port #(uart_trans) tx_in_port; // from env_tx driver
-    uvm_blocking_get_port #(uart_trans) rx_in_port; // from env_rx driver
-    uvm_analysis_port #(uart_trans) tx_out_port; // env_tx to scoreboard
-    uvm_analysis_port #(uart_trans) rx_out_port; // env_rx to scoreboard
+    uvm_blocking_get_port #(uart_trans) a_in_port; // from env_a driver
+    uvm_analysis_port #(uart_trans) a_out_port; // env_a to scoreboard
+
+    uvm_blocking_get_port #(uart_trans) b_in_port; // from env_b driver    
+    uvm_analysis_port #(uart_trans) b_out_port; // env_b to scoreboard
 
     function new(string name = "uart_model", uvm_component parent);
         super.new(name, parent);
@@ -19,11 +20,11 @@ class uart_model extends uvm_component;
     function void build_phase(uvm_phase phase);
         super.build_phase(phase);
         
-        tx_in_port = new("tx_in_port", this);
-        tx_out_port = new("tx_out_port", this);
+        a_in_port = new("a_in_port", this);
+        a_out_port = new("a_out_port", this);
 
-        rx_in_port = new("rx_in_port", this);
-        rx_out_port = new("rx_out_port", this);
+        b_in_port = new("b_in_port", this);
+        b_out_port = new("b_out_port", this);
     endfunction
 
     extern virtual task run_phase(uvm_phase phase);
@@ -38,10 +39,10 @@ task uart_model::run_phase(uvm_phase phase);
     super.run_phase(phase);
 
     fork
-        // env_tx -> env_rx
+        // env_a -> env_b
         forever begin
-            tx_in_port.get(in_tran);
-            `uvm_info("uart_model", $sformatf("env_tx: Got from driver tx_data = %0h", in_tran.tx_data), UVM_MEDIUM);
+            a_in_port.get(in_tran);
+            `uvm_info("uart_model", $sformatf("env_a: Got from driver tx_data = %0h", in_tran.tx_data), UVM_MEDIUM);
 
             encode_bits = encode(in_tran.tx_data);
             decode_byte = decode(encode_bits);
@@ -50,13 +51,14 @@ task uart_model::run_phase(uvm_phase phase);
             //out_tran.rx_data = in_tran.tx_data;
             out_tran.rx_data = decode_byte;
 
-            `uvm_info("uart_model", $sformatf("env_tx: Send to scoreboard rx_data = %0h", out_tran.rx_data), UVM_MEDIUM);
-            tx_out_port.write(out_tran);
+            `uvm_info("uart_model", $sformatf("env_a: Send to scoreboard rx_data = %0h", out_tran.rx_data), UVM_MEDIUM);
+            a_out_port.write(out_tran);
         end
-        // env_rx -> env_tx
+
+        // env_b -> env_a
         forever begin
-            rx_in_port.get(in_tran);
-            `uvm_info("uart_model", $sformatf("env_rx: Got from driver tx_data = %0h", in_tran.tx_data), UVM_MEDIUM);
+            b_in_port.get(in_tran);
+            `uvm_info("uart_model", $sformatf("env_b: Got from driver tx_data = %0h", in_tran.tx_data), UVM_MEDIUM);
 
             encode_bits = encode(in_tran.tx_data);
             decode_byte = decode(encode_bits);
@@ -65,8 +67,8 @@ task uart_model::run_phase(uvm_phase phase);
             //out_tran.rx_data = in_tran.tx_data;
             out_tran.rx_data = decode_byte;
 
-            `uvm_info("uart_model", $sformatf("env_rx: Send to scoreboard rx_data = %0h", out_tran.rx_data), UVM_MEDIUM);
-            rx_out_port.write(out_tran);
+            `uvm_info("uart_model", $sformatf("env_b: Send to scoreboard rx_data = %0h", out_tran.rx_data), UVM_MEDIUM);
+            b_out_port.write(out_tran);
         end
     join
 endtask

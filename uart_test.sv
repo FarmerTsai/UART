@@ -17,21 +17,23 @@ class uart_test extends uvm_test;
 	endfunction
     
     task run_phase(uvm_phase phase);
-    	uart_sequence tx_seq, rx_seq;
+    	uart_sequence a_seq, b_seq;
 		fork
 			begin
-				tx_seq = uart_sequence::type_id::create("tx_seq");
-    			if(!tx_seq.randomize()) 
+				// sequence for env_a
+				a_seq = uart_sequence::type_id::create("a_seq");
+    			if(!a_seq.randomize()) 
     				`uvm_error("", "Randomize failed")
-    			tx_seq.starting_phase = phase;
-    			tx_seq.start(env_top.env_tx.i_agt.sqr);
+    			a_seq.starting_phase = phase;
+    			a_seq.start(env_top.env_a.i_agt.sqr);
 			end
 			begin
-				rx_seq = uart_sequence::type_id::create("rx_seq");
-    			if( !rx_seq.randomize() ) 
+				// sequence for env_b
+				b_seq = uart_sequence::type_id::create("b_seq");
+    			if( !b_seq.randomize() ) 
     				`uvm_error("", "Randomize failed")
-    			rx_seq.starting_phase = phase;
-    			rx_seq.start(env_top.env_rx.i_agt.sqr);
+    			b_seq.starting_phase = phase;
+    			b_seq.start(env_top.env_b.i_agt.sqr);
 			end
 		join
     endtask

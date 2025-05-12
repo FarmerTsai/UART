@@ -1,5 +1,5 @@
-class uart_env_tx extends uvm_env;
-    `uvm_component_utils(uart_env_tx);
+class uart_env_a extends uvm_env;
+    `uvm_component_utils(uart_env_a);
     
     uart_agent i_agt;
 	uart_agent o_agt;
@@ -21,7 +21,7 @@ class uart_env_tx extends uvm_env;
 		o_agt.is_active = UVM_PASSIVE;
 
 		if(!uvm_config_db #(virtual uart_if)::get(this, "", "uart_if", vif)) begin
-			`uvm_fatal("uart_env_tx", "virtual interface must be set!");
+			`uvm_fatal("uart_env_a", "virtual interface must be set!");
 		end
     endfunction
 

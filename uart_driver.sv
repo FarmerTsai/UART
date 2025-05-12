@@ -3,8 +3,8 @@ class uart_driver extends uvm_driver #(uart_trans);
 
     uvm_blocking_put_port #(uart_trans) drv2mdl_port;
 
-    virtual uart_if tx_if;
-    virtual uart_if rx_if;
+    virtual uart_if a_if;
+    virtual uart_if b_if;
 
     bit is_tx;
     reg [7:0] data;
@@ -20,11 +20,11 @@ class uart_driver extends uvm_driver #(uart_trans);
         drv2mdl_port = new("put_port", this);
 
         `uvm_info("uart_driver", "build_phase is called", UVM_LOW);
-        if(!uvm_config_db #(virtual uart_if)::get(this, "", "tx_if", tx_if))begin
-            `uvm_fatal("uart_driver", "virtual interface must be set for vif!");
+        if(!uvm_config_db #(virtual uart_if)::get(this, "", "a_if", a_if))begin
+            `uvm_fatal("uart_driver", "virtual interface must be set for a_if!");
         end
-        if(!uvm_config_db #(virtual uart_if)::get(this, "", "rx_if", rx_if))begin
-            `uvm_fatal("uart_driver", "virtual interface must be set for rx_if!");
+        if(!uvm_config_db #(virtual uart_if)::get(this, "", "b_if", b_if))begin
+            `uvm_fatal("uart_driver", "virtual interface must be set for b_if!");
         end
         if(!uvm_config_db #(bit)::get(this, "", "is_tx", is_tx))begin
             `uvm_fatal("uart_driver", "virtual interface must be set for is_tx!");
@@ -35,51 +35,51 @@ class uart_driver extends uvm_driver #(uart_trans);
 endclass
 
 task uart_driver::run_phase(uvm_phase phase);
-    uart_trans tx_req, rx_req;
+    uart_trans a_req, b_req;
 
-    // env_tx
+    // env_a
     if(is_tx) begin
         `uvm_info(get_full_name(), $sformatf("is_tx = %0d", is_tx), UVM_MEDIUM);
         forever begin
-            seq_item_port.get_next_item(tx_req);
-            `uvm_info("uart_driver", $sformatf("env_tx: Got item from sequencer tx_data = %0h", tx_req.tx_data), UVM_MEDIUM);
+            seq_item_port.get_next_item(a_req);
+            `uvm_info("uart_driver", $sformatf("env_a: Got item from sequencer tx_data = %0h", a_req.tx_data), UVM_MEDIUM);
 
-            @(posedge tx_if.clk);
-            tx_if.tx_data <= tx_req.tx_data;
+            @(posedge a_if.clk);
+            a_if.tx_data <= a_req.tx_data;
             //tx_if.tx_data <= tx_if.tx_data << 1; // for error test
-            tx_if.tx_en <= 1;
+            a_if.tx_en <= 1;
 
-            @(posedge tx_if.clk);
-            tx_if.tx_en <= 0;
-            drv2mdl_port.put(tx_req); // to model
-            // wait env_rx receive data
-            wait(rx_if.rx_ready == 1);
-            $display("env_tx: A sequence is finish!");
+            @(posedge a_if.clk);
+            a_if.tx_en <= 0;
+            drv2mdl_port.put(a_req); // to model
+            // wait env_b dut receive data
+            wait(b_if.rx_ready == 1);
+            $display("env_a: A sequence is finish!");
 
-            repeat(10) @(posedge tx_if.clk);
+            repeat(10) @(posedge a_if.clk);
 
             seq_item_port.item_done();
         end
     end
-    // env_rx
+    // env_b
     else if(!is_tx) begin
         `uvm_info(get_full_name(), $sformatf("is_tx = %0d", is_tx), UVM_MEDIUM);
         forever begin
-            seq_item_port.get_next_item(rx_req);
-            `uvm_info("uart_driver", $sformatf("env_rx: Got item from sequencer tx_data = %0h", rx_req.tx_data), UVM_MEDIUM);
+            seq_item_port.get_next_item(b_req);
+            `uvm_info("uart_driver", $sformatf("env_rx: Got item from sequencer tx_data = %0h", b_req.tx_data), UVM_MEDIUM);
 
-            @(posedge rx_if.clk);
-            rx_if.tx_data <= rx_req.tx_data;
-            rx_if.tx_en <= 1;
+            @(posedge b_if.clk);
+            b_if.tx_data <= b_req.tx_data;
+            b_if.tx_en <= 1;
 
-            @(posedge rx_if.clk);
-            rx_if.tx_en <= 0;
-            drv2mdl_port.put(rx_req); // to model
-            // wait env_tx receive data
-            wait(tx_if.rx_ready == 1);
+            @(posedge b_if.clk);
+            b_if.tx_en <= 0;
+            drv2mdl_port.put(b_req); // to model
+            // wait env_a dut receive data
+            wait(a_if.rx_ready == 1);
             $display("env_rx: A sequence is finish!");
 
-            repeat(10) @(posedge rx_if.clk);
+            repeat(10) @(posedge b_if.clk);
 
             seq_item_port.item_done();
         end

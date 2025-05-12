@@ -12,8 +12,8 @@ import uvm_pkg::*;
 `include "uart_model.sv"
 `include "uart_scoreboard.sv"
 `include "uart_coverage.sv"
-`include "uart_env_rx.sv"
-`include "uart_env_tx.sv"
+`include "uart_env_a.sv"
+`include "uart_env_b.sv"
 `include "uart_env_top.sv"
 `include "uart_test.sv"
 
@@ -22,34 +22,34 @@ module tb_uart_top;
     reg clk;
     reg rst_n;
   
-    uart_if tx_if(.clk(clk), .rst_n(rst_n));
-    uart_if rx_if(.clk(clk), .rst_n(rst_n));
+    uart_if a_if(.clk(clk), .rst_n(rst_n));
+    uart_if b_if(.clk(clk), .rst_n(rst_n));
   
-    uart dut_tx(
-        .clk(tx_if.clk),
-        .rst_n(tx_if.rst_n),
-        .tx_en(tx_if.tx_en),
-        .tx_data(tx_if.tx_data),
-        .uart_txd(tx_if.uart_txd),
-        .uart_rxd(tx_if.uart_rxd),
-        .rx_data(tx_if.rx_data),
-        .rx_ready(tx_if.rx_ready)
+    uart dut_a(
+        .clk(a_if.clk),
+        .rst_n(a_if.rst_n),
+        .tx_en(a_if.tx_en),
+        .tx_data(a_if.tx_data),
+        .uart_txd(a_if.uart_txd),
+        .uart_rxd(a_if.uart_rxd),
+        .rx_data(a_if.rx_data),
+        .rx_ready(a_if.rx_ready)
     );
 
-    uart dut_rx(
-        .clk(rx_if.clk),
-        .rst_n(rx_if.rst_n),
-        .tx_en(rx_if.tx_en),
-        .tx_data(rx_if.tx_data),
-        .uart_txd(rx_if.uart_txd),
-        .uart_rxd(rx_if.uart_rxd),
-        .rx_data(rx_if.rx_data),
-        .rx_ready(rx_if.rx_ready)
+    uart dut_b(
+        .clk(b_if.clk),
+        .rst_n(b_if.rst_n),
+        .tx_en(b_if.tx_en),
+        .tx_data(b_if.tx_data),
+        .uart_txd(b_if.uart_txd),
+        .uart_rxd(b_if.uart_rxd),
+        .rx_data(b_if.rx_data),
+        .rx_ready(b_if.rx_ready)
     );
 
     // connect two dut
-    assign rx_if.uart_rxd = tx_if.uart_txd;
-    assign tx_if.uart_rxd = rx_if.uart_txd;
+    assign b_if.uart_rxd = a_if.uart_txd;
+    assign a_if.uart_rxd = b_if.uart_txd;
 
     // waveform dump
     initial begin
@@ -78,18 +78,18 @@ module tb_uart_top;
 
     initial begin
         // env_tx
-        uvm_config_db #(virtual uart_if)::set(null, "uvm_test_top.env_top.env_tx", "uart_if", tx_if);		
-        uvm_config_db #(virtual uart_if)::set(null, "uvm_test_top.env_top.env_tx.i_agt.mon", "uart_if", tx_if);		
-        uvm_config_db #(virtual uart_if)::set(null, "uvm_test_top.env_top.env_tx.i_agt.drv", "tx_if", tx_if);
-		uvm_config_db #(virtual uart_if)::set(null, "uvm_test_top.env_top.env_tx.i_agt.drv", "rx_if", rx_if);
-        uvm_config_db #(virtual uart_if)::set(null, "uvm_test_top.env_top.env_tx.o_agt.mon", "uart_if", tx_if);
+        uvm_config_db #(virtual uart_if)::set(null, "uvm_test_top.env_top.env_a", "uart_if", a_if);		
+        uvm_config_db #(virtual uart_if)::set(null, "uvm_test_top.env_top.env_a.i_agt.mon", "uart_if", a_if);		
+        uvm_config_db #(virtual uart_if)::set(null, "uvm_test_top.env_top.env_a.i_agt.drv", "a_if", a_if);
+		uvm_config_db #(virtual uart_if)::set(null, "uvm_test_top.env_top.env_a.i_agt.drv", "b_if", b_if);
+        uvm_config_db #(virtual uart_if)::set(null, "uvm_test_top.env_top.env_a.o_agt.mon", "uart_if", a_if);
         
         // env_rx
-        uvm_config_db #(virtual uart_if)::set(null, "uvm_test_top.env_top.env_rx", "uart_if", rx_if);
-        uvm_config_db #(virtual uart_if)::set(null, "uvm_test_top.env_top.env_rx.i_agt.mon", "uart_if", rx_if);
-        uvm_config_db #(virtual uart_if)::set(null, "uvm_test_top.env_top.env_rx.i_agt.drv", "tx_if", tx_if);
-		uvm_config_db #(virtual uart_if)::set(null, "uvm_test_top.env_top.env_rx.i_agt.drv", "rx_if", rx_if);
-        uvm_config_db #(virtual uart_if)::set(null, "uvm_test_top.env_top.env_rx.o_agt.mon", "uart_if", rx_if);
+        uvm_config_db #(virtual uart_if)::set(null, "uvm_test_top.env_top.env_b", "uart_if", b_if);
+        uvm_config_db #(virtual uart_if)::set(null, "uvm_test_top.env_top.env_b.i_agt.mon", "uart_if", b_if);
+        uvm_config_db #(virtual uart_if)::set(null, "uvm_test_top.env_top.env_b.i_agt.drv", "a_if", a_if);
+		uvm_config_db #(virtual uart_if)::set(null, "uvm_test_top.env_top.env_b.i_agt.drv", "b_if", b_if);
+        uvm_config_db #(virtual uart_if)::set(null, "uvm_test_top.env_top.env_b.o_agt.mon", "uart_if", b_if);
 
         
         // start test
