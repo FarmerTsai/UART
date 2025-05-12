@@ -90,6 +90,13 @@ task uart_driver::run_phase(uvm_phase phase);
             b_if.tx_data <= b_req.tx_data;
             b_if.tx_en <= 1;
 
+            if(a_req.do_reset == 1) begin
+                repeat(10) @(posedge a_if.clk); // wait transmission begin
+                a_if.rst_n <= 0;
+                @(posedge a_if.clk);
+                a_if.rst_n <= 1;
+            end
+
             @(posedge b_if.clk);
             b_if.tx_en <= 0;
             drv2mdl_port.put(b_req); // to model
