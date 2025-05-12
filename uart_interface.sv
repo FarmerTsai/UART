@@ -1,4 +1,6 @@
-interface uart_if(input clk, input rst_n);
+interface uart_if(input clk);
+	logic rst_n;
+
 	// for TX
 	logic tx_en;
 	logic [7:0] tx_data;

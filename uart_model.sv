@@ -49,7 +49,10 @@ task uart_model::run_phase(uvm_phase phase);
             
             out_tran = uart_trans::type_id::create("out_tran");
             //out_tran.rx_data = in_tran.tx_data;
-            out_tran.rx_data = decode_byte;
+            if(in_tran.do_reset)
+                out_tran.rx_data = 0;
+            else
+                out_tran.rx_data = decode_byte;
 
             `uvm_info("uart_model", $sformatf("env_a: Send to scoreboard rx_data = %0h", out_tran.rx_data), UVM_MEDIUM);
             a_out_port.write(out_tran);
@@ -65,7 +68,10 @@ task uart_model::run_phase(uvm_phase phase);
 
             out_tran = uart_trans::type_id::create("out_tran");
             //out_tran.rx_data = in_tran.tx_data;
-            out_tran.rx_data = decode_byte;
+            if(in_tran.do_reset)
+                out_tran.rx_data = 0;
+            else
+                out_tran.rx_data = decode_byte;
 
             `uvm_info("uart_model", $sformatf("env_b: Send to scoreboard rx_data = %0h", out_tran.rx_data), UVM_MEDIUM);
             b_out_port.write(out_tran);

@@ -40,6 +40,11 @@ task uart_driver::run_phase(uvm_phase phase);
     // env_a
     if(is_tx) begin
         `uvm_info(get_full_name(), $sformatf("is_tx = %0d", is_tx), UVM_MEDIUM);
+        // reset
+        a_if.rst_n <= 0;
+        @(posedge a_if.clk);
+        a_if.rst_n <= 1;
+
         forever begin
             seq_item_port.get_next_item(a_req);
             `uvm_info("uart_driver", $sformatf("env_a: Got item from sequencer tx_data = %0h", a_req.tx_data), UVM_MEDIUM);
@@ -49,6 +54,13 @@ task uart_driver::run_phase(uvm_phase phase);
             //tx_if.tx_data <= tx_if.tx_data << 1; // for error test
             a_if.tx_en <= 1;
 
+            if(a_req.do_reset == 1) begin
+                repeat(10) @(posedge a_if.clk); // wait transmission begin
+                a_if.rst_n <= 0;
+                @(posedge a_if.clk);
+                a_if.rst_n <= 1;
+            end
+            
             @(posedge a_if.clk);
             a_if.tx_en <= 0;
             drv2mdl_port.put(a_req); // to model
@@ -61,12 +73,18 @@ task uart_driver::run_phase(uvm_phase phase);
             seq_item_port.item_done();
         end
     end
+
     // env_b
     else if(!is_tx) begin
         `uvm_info(get_full_name(), $sformatf("is_tx = %0d", is_tx), UVM_MEDIUM);
+        // reset
+        b_if.rst_n <= 0;
+        @(posedge b_if.clk);
+        b_if.rst_n <= 1;
+
         forever begin
             seq_item_port.get_next_item(b_req);
-            `uvm_info("uart_driver", $sformatf("env_rx: Got item from sequencer tx_data = %0h", b_req.tx_data), UVM_MEDIUM);
+            `uvm_info("uart_driver", $sformatf("env_b: Got item from sequencer tx_data = %0h", b_req.tx_data), UVM_MEDIUM);
 
             @(posedge b_if.clk);
             b_if.tx_data <= b_req.tx_data;
@@ -77,7 +95,7 @@ task uart_driver::run_phase(uvm_phase phase);
             drv2mdl_port.put(b_req); // to model
             // wait env_a dut receive data
             wait(a_if.rx_ready == 1);
-            $display("env_rx: A sequence is finish!");
+            $display("env_b: A sequence is finish!");
 
             repeat(10) @(posedge b_if.clk);
 

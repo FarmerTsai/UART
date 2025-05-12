@@ -6,6 +6,7 @@ import uvm_pkg::*;
 `include "uart_transaction.sv"
 `include "uart_basic_sequence.sv"
 `include "uart_corner_sequence.sv"
+`include "uart_special_sequence.sv"
 `include "uart_sequencer.sv"
 `include "uart_driver.sv"
 `include "uart_monitor.sv"
@@ -19,14 +20,15 @@ import uvm_pkg::*;
 `include "uart_base_test.sv"
 `include "uart_basic_test.sv"
 `include "uart_corner_test.sv"
+`include "uart_special_test.sv"
 
 module tb_uart_top; 
   
     reg clk;
     reg rst_n;
   
-    uart_if a_if(.clk(clk), .rst_n(rst_n));
-    uart_if b_if(.clk(clk), .rst_n(rst_n));
+    uart_if a_if(.clk(clk));
+    uart_if b_if(.clk(clk));
   
     uart dut_a(
         .clk(a_if.clk),
@@ -71,13 +73,13 @@ module tb_uart_top;
     end
   
     // generate reset
-    initial begin
+    /*initial begin
         rst_n = 1'b0;
         $display("Time: %0t: top.rst_n is 1'b0", $time);
         #100;
         rst_n = 1'b1;
         $display("Time: %0t: top.rst_n is 1'b1", $time);
-    end
+    end*/
 
     initial begin
         // env_tx
@@ -96,7 +98,7 @@ module tb_uart_top;
 
         
         // start test
-        run_test("uart_corner_test");
+        run_test("uart_special_test");
     end
 
 endmodule
