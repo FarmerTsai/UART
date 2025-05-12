@@ -3,7 +3,7 @@ class uart_basic_sequence extends uvm_sequence #(uart_trans);
 
     uart_trans utrans;
     
-    function new (string name); 
+    function new (string name = "uart_basic_sequence"); 
         super.new(name);
     endfunction
 
@@ -27,7 +27,7 @@ class uart_basic_sequence extends uvm_sequence #(uart_trans);
             end
             else begin
                 if(!utrans.randomize())
-                    `uvm_error("uart_sequence", "Randomize failed!");
+                    `uvm_error("uart_basic_sequence", "Randomize failed!");
             end
 
             start_item(utrans);
