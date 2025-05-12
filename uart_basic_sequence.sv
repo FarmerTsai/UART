@@ -1,10 +1,10 @@
-class uart_sequence extends uvm_sequence #(uart_trans);  
-    `uvm_object_utils(uart_sequence);
+class uart_basic_sequence extends uvm_sequence #(uart_trans);  
+    `uvm_object_utils(uart_basic_sequence);
 
     uart_trans utrans;
     
-    function new (string name = "uart_sequence"); 
-      super.new(name);
+    function new (string name); 
+        super.new(name);
     endfunction
 
     virtual task body();
