@@ -81,8 +81,11 @@ module tb_uart_top;
     end*/
 
     initial begin
+        uvm_config_db #(virtual uart_if)::set(null, "*", "a_if", a_if);
+        uvm_config_db #(virtual uart_if)::set(null, "*", "b_if", b_if);
+
         // env_tx
-        uvm_config_db #(virtual uart_if)::set(null, "uvm_test_top.env_top.env_a", "uart_if", a_if);		
+        /*uvm_config_db #(virtual uart_if)::set(null, "uvm_test_top.env_top.env_a", "uart_if", a_if);		
         uvm_config_db #(virtual uart_if)::set(null, "uvm_test_top.env_top.env_a.i_agt.mon", "uart_if", a_if);		
         uvm_config_db #(virtual uart_if)::set(null, "uvm_test_top.env_top.env_a.i_agt.drv", "a_if", a_if);
 		uvm_config_db #(virtual uart_if)::set(null, "uvm_test_top.env_top.env_a.i_agt.drv", "b_if", b_if);
@@ -93,7 +96,7 @@ module tb_uart_top;
         uvm_config_db #(virtual uart_if)::set(null, "uvm_test_top.env_top.env_b.i_agt.mon", "uart_if", b_if);
         uvm_config_db #(virtual uart_if)::set(null, "uvm_test_top.env_top.env_b.i_agt.drv", "a_if", a_if);
 		uvm_config_db #(virtual uart_if)::set(null, "uvm_test_top.env_top.env_b.i_agt.drv", "b_if", b_if);
-        uvm_config_db #(virtual uart_if)::set(null, "uvm_test_top.env_top.env_b.o_agt.mon", "uart_if", b_if);
+        uvm_config_db #(virtual uart_if)::set(null, "uvm_test_top.env_top.env_b.o_agt.mon", "uart_if", b_if);*/
 
         
         // start test

@@ -22,9 +22,19 @@ class uart_mon extends uvm_monitor;
 
 	  	ap_port = new("ap_port", this);
 		cov_port = new("cov_port", this);
-		if(!uvm_config_db #(virtual uart_if)::get(this, "", "uart_if", mif)) begin
-		    `uvm_error("ERROR::", "UVM_CONFIG_DB FAILED in uart_mon")
+
+		// env_a
+		if(get_parent().get_parent().get_name() == "env_a") begin
+			if(!uvm_config_db #(virtual uart_if)::get(this, "", "a_if", mif)) begin
+		    	`uvm_error("ERROR::", "UVM_CONFIG_DB FAILED in uart_mon")
+			end
 		end
+		// env_b
+		else
+			if(!uvm_config_db #(virtual uart_if)::get(this, "", "b_if", mif)) begin
+		    	`uvm_error("ERROR::", "UVM_CONFIG_DB FAILED in uart_mon")
+			end
+		
 	endfunction
 	
 	extern virtual task run_phase(uvm_phase phase);
@@ -62,4 +72,4 @@ task uart_mon::run_phase(uvm_phase phase);
 				cov_port.write(ctrans);
 		end
 	join
-endtask  
+endtask
