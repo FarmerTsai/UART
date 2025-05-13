@@ -2,6 +2,7 @@ module uart_rx(
     input clk,
     input rst_n,
     input uart_rxd, // receive pin
+    input [7:0] DIV,
 
     output reg [7:0] rx_data, // receive data
     output reg rx_ready // receive finish
@@ -12,9 +13,9 @@ module uart_rx(
 //parameter CLK_FREQ = 50000000; // 50MHZ
 //parameter DIV = CLK_FREQ / BAUD_RATE;
 
-parameter BAUD_RATE = 100000; // for test
-parameter CLK_FREQ = 1000000; // 1MHZ
-parameter DIV = CLK_FREQ / BAUD_RATE; // 10
+//parameter BAUD_RATE = 100000; // for test
+//parameter CLK_FREQ = 1000000; // 1MHZ
+//parameter DIV = CLK_FREQ / BAUD_RATE; // 10
 
 // FSM parameter
 parameter IDLE = 0;

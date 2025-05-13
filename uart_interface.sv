@@ -1,5 +1,6 @@
 interface uart_if(input clk);
 	logic rst_n;
+	logic [7:0] DIV;
 
 	// for TX
 	logic tx_en;

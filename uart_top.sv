@@ -32,6 +32,7 @@ module tb_uart_top;
     uart dut_a(
         .clk(a_if.clk),
         .rst_n(a_if.rst_n),
+        .DIV(a_if.DIV), // test baud_rate
         .tx_en(a_if.tx_en),
         .tx_data(a_if.tx_data),
         .uart_txd(a_if.uart_txd),
@@ -43,6 +44,7 @@ module tb_uart_top;
     uart dut_b(
         .clk(b_if.clk),
         .rst_n(b_if.rst_n),
+        .DIV(b_if.DIV), // test baud_rate
         .tx_en(b_if.tx_en),
         .tx_data(b_if.tx_data),
         .uart_txd(b_if.uart_txd),

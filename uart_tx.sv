@@ -4,6 +4,7 @@ module uart_tx (
     input rst_n, // asynchronous active low reset
     input tx_en,
     input [7:0] tx_data,
+    input [7:0] DIV,
 
     output reg uart_txd, // uart transmittion data
     output reg tx_done // pull high when tx_data is send finish
@@ -16,9 +17,9 @@ module uart_tx (
 // 1 start bit + 8 data bit + 1 stop bit
 // => 10 bit, need 5208 * 10 clock
 
-parameter BAUD_RATE = 100000; // for test
-parameter CLK_FREQ = 1000000; // 1MHZ
-parameter DIV = CLK_FREQ / BAUD_RATE; // 10
+//parameter BAUD_RATE = 100000; // for test
+//parameter CLK_FREQ = 1000000; // 1MHZ
+//parameter DIV = CLK_FREQ / BAUD_RATE; // 10
 
 // FSM parameter
 parameter IDLE = 0;
