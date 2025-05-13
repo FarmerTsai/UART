@@ -21,7 +21,7 @@ class uart_base_test extends uvm_test;
 			`uvm_fatal("uart_base_test", "virtual interface must be set for b_if!");
 		a_if.DIV = CLK_FREQ / BAUD_RATE;
 		b_if.DIV = CLK_FREQ / BAUD_RATE;
-		
+
     	env_top = uart_env_top::type_id::create("env_top", this);
     endfunction
     
