@@ -13,7 +13,12 @@ function void uart_basic_test::build_phase(uvm_phase phase);
 	randcase
 		1: BAUD_RATE = 4800;
 		1: BAUD_RATE = 9600;
+		1: BAUD_RATE = 19200;
+		1: BAUD_RATE = 38400;
+		1: BAUD_RATE = 57600;
+		1: BAUD_RATE = 115200;
 	endcase
+
 	`uvm_info("uart_basic_test", $sformatf("Random BAUD RATE is: %0d", BAUD_RATE), UVM_LOW);
 	super.build_phase(phase);
 endfunction

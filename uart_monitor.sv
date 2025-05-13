@@ -26,13 +26,13 @@ class uart_mon extends uvm_monitor;
 		// env_a
 		if(get_parent().get_parent().get_name() == "env_a") begin
 			if(!uvm_config_db #(virtual uart_if)::get(this, "", "a_if", mif)) begin
-		    	`uvm_error("ERROR::", "UVM_CONFIG_DB FAILED in uart_mon")
+		    	`uvm_error("env_a.mon", "virtual interface must be set for mif")
 			end
 		end
 		// env_b
 		else
 			if(!uvm_config_db #(virtual uart_if)::get(this, "", "b_if", mif)) begin
-		    	`uvm_error("ERROR::", "UVM_CONFIG_DB FAILED in uart_mon")
+		    	`uvm_error("env_b.mon", "virtual interface must be set for mif")
 			end
 		
 	endfunction

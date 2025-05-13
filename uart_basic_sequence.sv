@@ -7,7 +7,7 @@ class uart_basic_sequence extends uvm_sequence #(uart_trans);
         super.new(name);
     endfunction
 
-    virtual task body();
+    task body();
         if(starting_phase != null)
             starting_phase.raise_objection(this);
 
