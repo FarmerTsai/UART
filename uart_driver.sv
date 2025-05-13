@@ -65,7 +65,8 @@ task uart_driver::run_phase(uvm_phase phase);
             a_if.tx_en <= 0;
             drv2mdl_port.put(a_req); // to model
             // wait env_b dut receive data
-            wait(b_if.rx_ready == 1);
+            //wait(b_if.rx_ready == 1);
+            repeat(a_if.DIV * 10) @(posedge a_if.clk); // DIV * (1 start bit + 8 data bit + 1 stop bit)
             $display("env_a: A sequence is finish!");
 
             repeat(10) @(posedge a_if.clk);
@@ -101,7 +102,8 @@ task uart_driver::run_phase(uvm_phase phase);
             b_if.tx_en <= 0;
             drv2mdl_port.put(b_req); // to model
             // wait env_a dut receive data
-            wait(a_if.rx_ready == 1);
+            //wait(a_if.rx_ready == 1);
+            repeat(b_if.DIV * 10) @(posedge b_if.clk); // DIV * (1 start bit + 8 data bit + 1 stop bit)
             $display("env_b: A sequence is finish!");
 
             repeat(10) @(posedge b_if.clk);
