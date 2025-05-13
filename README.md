@@ -18,3 +18,4 @@
 ### 20250513
 - add basic/corner/special test & sequence
 - add model reset, and can detect that DUT dose not actually reset in special case
+- can random BAUD RATE and set DIV in config_db
