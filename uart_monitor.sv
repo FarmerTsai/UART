@@ -63,11 +63,13 @@ task uart_mon::run_phase(uvm_phase phase);
 				ap_port.write(mtrans);
 			end
     	end
+		
 		// coverage
 		forever begin
 			@(posedge mif.clk);
 			ctrans = uart_trans::type_id::create("ctrans");
 			ctrans.tx_data = mif.tx_data;
+			ctrans.baud_tr = mif.BAUD_RATE;
 			if(!is_o_agt)
 				cov_port.write(ctrans);
 		end

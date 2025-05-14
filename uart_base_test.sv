@@ -19,6 +19,8 @@ class uart_base_test extends uvm_test;
 			`uvm_fatal("uart_base_test", "virtual interface must be set for a_if!");
 		if(!uvm_config_db #(virtual uart_if)::get(this, "", "b_if", b_if))
 			`uvm_fatal("uart_base_test", "virtual interface must be set for b_if!");
+		a_if.BAUD_RATE = BAUD_RATE;
+		b_if.BAUD_RATE = BAUD_RATE;
 		a_if.DIV = CLK_FREQ / BAUD_RATE;
 		b_if.DIV = CLK_FREQ / BAUD_RATE;
 

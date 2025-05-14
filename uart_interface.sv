@@ -1,6 +1,7 @@
 interface uart_if(input clk);
 	logic rst_n;
 	logic [7:0] DIV;
+	int BAUD_RATE;
 
 	// for TX
 	logic tx_en;

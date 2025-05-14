@@ -4,9 +4,9 @@ class uart_coverage extends uvm_subscriber #(uart_trans);
     uart_trans tr;
 
     covergroup uart_cov;
-        option.comment = "Coverage for an uart";
+        option.comment = "Coverage for uart";
 
-        val_A: coverpoint(tr.tx_data)
+        tx_data_cp: coverpoint(tr.tx_data)
         {
             bins min = {0};
             bins bin0 = {[1:31]};
@@ -20,6 +20,18 @@ class uart_coverage extends uvm_subscriber #(uart_trans);
             bins bin7 = {[223:254]};
             bins max = {255};
         }
+
+        baud_rate_cp: coverpoint(tr.baud_tr)
+        {
+            bins rate_0 = {4800};
+            bins rate_1 = {9600};
+            bins rate_2 = {19200};
+            bins rate_3 = {38400};
+            bins rate_4 = {57600};
+            bins rate_5 = {115200};
+        }
+
+        data_baud_cross: cross tx_data_cp, baud_rate_cp;
     endgroup
 
     function new(string name = "uart_coverage", uvm_component parent);
