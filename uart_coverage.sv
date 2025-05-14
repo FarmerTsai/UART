@@ -45,7 +45,8 @@ class uart_coverage extends uvm_subscriber #(uart_trans);
     endfunction
 
     function void report_phase(uvm_phase phase);
-        `uvm_info(get_full_name(), $sformatf("Coverage is %0.2f %%", uart_cov.get_coverage()), UVM_LOW);        
+        `uvm_info(get_full_name(), $sformatf("\nCoverage Report\nTotal Coverage: %0.2f %%\nTx_data Coverage: %0.2f %%\nBaud Rate Coverage: %0.2f %%\nCross Coverage: %0.2f %%"
+        , uart_cov.get_coverage(), uart_cov.tx_data_cp.get_coverage(), uart_cov.baud_rate_cp.get_coverage(), uart_cov.data_baud_cross.get_coverage()), UVM_LOW);       
     endfunction
 
 endclass

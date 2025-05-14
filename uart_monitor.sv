@@ -63,7 +63,7 @@ task uart_mon::run_phase(uvm_phase phase);
 				ap_port.write(mtrans);
 			end
     	end
-		
+
 		// coverage
 		forever begin
 			@(posedge mif.clk);
