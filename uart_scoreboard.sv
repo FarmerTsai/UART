@@ -55,7 +55,12 @@ task uart_scoreboard::run_phase(uvm_phase phase);
             wait(a_expect_queue.size() > 0);
             a_act_port.get(a_get_actual); // from dut b
             a_tmp_tran = a_expect_queue.pop_front();
-            a_result = a_get_actual.compare(a_tmp_tran);
+            //a_result = a_get_actual.compare(a_tmp_tran);
+            if(a_get_actual.rx_data === a_tmp_tran.rx_data)
+                a_result = 1;
+            else
+                a_result = 0;
+                
             a_compare_cnt++;
 
             if(a_result) begin
@@ -83,7 +88,12 @@ task uart_scoreboard::run_phase(uvm_phase phase);
             wait(b_expect_queue.size() > 0);
             b_act_port.get(b_get_actual); // from dut a
             b_tmp_tran = b_expect_queue.pop_front();
-            b_result = b_get_actual.compare(b_tmp_tran);
+            //b_result = b_get_actual.compare(b_tmp_tran);
+            if(b_get_actual.rx_data === b_tmp_tran.rx_data)
+                b_result = 1;
+            else
+                b_result = 0;
+
             b_compare_cnt++;
 
             if(b_result) begin
@@ -105,6 +115,6 @@ endtask
 function void uart_scoreboard::report_phase(uvm_phase phase);
     super.report_phase(phase);
 
-    `uvm_info("uart_scoreboard", $sformatf("\nenv _tx: Total compare times is: %0d\tMatch count is: %0d\tMismatch count is: %0d", a_compare_cnt, a_match_cnt, a_mismatch_cnt), UVM_LOW);
-    `uvm_info("uart_scoreboard", $sformatf("\nenv_rx: Total compare times is: %0d\tMatch count is: %0d\tMismatch count is: %0d", b_compare_cnt, b_match_cnt, b_mismatch_cnt), UVM_LOW);
+    `uvm_info("uart_scoreboard", $sformatf("\nenv_a: Total compare times is: %0d\tMatch count is: %0d\tMismatch count is: %0d", a_compare_cnt, a_match_cnt, a_mismatch_cnt), UVM_LOW);
+    `uvm_info("uart_scoreboard", $sformatf("\nenv_b: Total compare times is: %0d\tMatch count is: %0d\tMismatch count is: %0d", b_compare_cnt, b_match_cnt, b_mismatch_cnt), UVM_LOW);
 endfunction

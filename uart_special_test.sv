@@ -5,8 +5,23 @@ class uart_special_test extends uart_base_test;
     	super.new(name, parent);
     endfunction
 
+	extern virtual function void build_phase(uvm_phase phase);
 	extern task run_phase(uvm_phase phase);
 endclass
+
+function void uart_special_test::build_phase(uvm_phase phase);
+	randcase
+		1: BAUD_RATE = 4800;
+		1: BAUD_RATE = 9600;
+		1: BAUD_RATE = 19200;
+		1: BAUD_RATE = 38400;
+		1: BAUD_RATE = 57600;
+		1: BAUD_RATE = 115200;
+	endcase
+
+	`uvm_info("uart_basic_test", $sformatf("Random BAUD RATE is: %0d", BAUD_RATE), UVM_LOW);
+	super.build_phase(phase);
+endfunction
 
 task uart_special_test::run_phase(uvm_phase phase);
 	uart_special_sequence a_seq, b_seq;
