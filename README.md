@@ -20,3 +20,9 @@
 - can random BAUD RATE and set DIV in config_db
 ### 20250514
 - add BAUD RATE coverage
+
+### 20250525
+- according to supervisor's instructions, some features will be modify
+- remove env_top, and create the env based on DUT number
+- i_agt monitor will capture tx signal, including start bit and stop bit
+- o_agt monitor will capture rx input and pass to the model
