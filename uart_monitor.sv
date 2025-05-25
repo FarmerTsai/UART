@@ -1,8 +1,10 @@
 class uart_mon extends uvm_monitor;
 	`uvm_component_utils(uart_mon)
 	
-	virtual uart_if mif;
-	uvm_analysis_port #(uart_trans) ap_port;
+	virtual uart_if vif;
+	uvm_analysis_port #(uart_trans) tx2scb_port; // tx output to scoreboard
+	uvm_analysis_port #(uart_trans) rx2mdl_port; // rx input to model
+	uvm_analysis_port #(uart_trans) dut2scb_port; // dut to scoreboard
 	uvm_analysis_port #(uart_trans) cov_port;
 
 	bit is_o_agt = 0;
@@ -11,65 +13,82 @@ class uart_mon extends uvm_monitor;
 		super.new(name, parent);
 	endfunction
 
-	function void build_phase(uvm_phase phase);
-	  	super.build_phase(phase);
-
-		if(get_name() == "mon" && get_parent().get_name() == "o_agt") begin
-			is_o_agt = 1;
-		end else begin
-			is_o_agt = 0;
-		end
-
-	  	ap_port = new("ap_port", this);
-		cov_port = new("cov_port", this);
-
-		// env_a
-		if(get_parent().get_parent().get_name() == "env_a") begin
-			if(!uvm_config_db #(virtual uart_if)::get(this, "", "a_if", mif)) begin
-		    	`uvm_error("env_a.mon", "virtual interface must be set for mif")
-			end
-		end
-		// env_b
-		else
-			if(!uvm_config_db #(virtual uart_if)::get(this, "", "b_if", mif)) begin
-		    	`uvm_error("env_b.mon", "virtual interface must be set for mif")
-			end
-		
-	endfunction
-	
+	extern function void build_phase(uvm_phase phase);
 	extern virtual task run_phase(uvm_phase phase);
 endclass
+
+function void uart_mon::build_phase(uvm_phase phase);
+	super.build_phase(phase);
+
+	if(get_name() == "mon" && get_parent().get_name() == "o_agt") begin
+		is_o_agt = 1;
+	end else begin
+		is_o_agt = 0;
+	end
+
+	if(!uvm_config_db #(virtual uart_if)::get(this, "", "a_if", vif)) begin
+		`uvm_error("uart_monitor", "virtual interface must be set for vif")
+	end
+
+	if(!is_o_agt) begin
+		tx2scb_port = new("tx2scb_port", this);
+	end
+	else if(is_o_agt) begin
+		rx2mdl_port = new("rx2mdl_port", this);
+		dut2scb_port = new("dut2scb_port", this);
+	end
+	cov_port = new("cov_port", this);
+endfunction
 
 task uart_mon::run_phase(uvm_phase phase);
 	uart_trans mtrans;
 	uart_trans ctrans;
 	
 	fork
-		forever begin
-    		@(posedge mif.clk);
-			if(mif.rx_ready) begin
-				mtrans = uart_trans::type_id::create("mtrans");
-				mtrans.rx_data = mif.rx_data;
-				if(is_o_agt)
+		// i_agt.mon: tx output to scoreboard
+		if(!is_o_agt) begin
+			forever begin
+				@(posedge vif.clk);
+				if(vif.tx_en) begin
+					// capture tx output data
+				end
+			end
+		end
+
+		if(is_o_agt) begin
+			// o_agt.mon: rx input to model
+			forever begin
+				@(posedge vif.clk);
+				if(vif.tx_en) begin
+					// capture rx serial data
+				end
+			end
+			// o_agt.mon: DUT rx_data to scoreboard
+			forever begin
+    			@(posedge vif.clk);
+				if(vif.rx_ready) begin
+					mtrans = uart_trans::type_id::create("mtrans");
+					mtrans.rx_data = vif.rx_data;
 					`uvm_info("uart_monitor", $sformatf("Captured RX data: %0h", mtrans.rx_data), UVM_MEDIUM);
 
-				// for error test
-				/*if($urandom_range(0, 100) < 10) begin
-					`uvm_warning("uart_monitor", "Drop this RX data!!!");
-				end
-				else
-      				ap_port.write(mtrans);*/
+					// for error test
+					/*if($urandom_range(0, 100) < 10) begin
+						`uvm_warning("uart_monitor", "Drop this RX data!!!");
+					end
+					else
+      					dut2scb_port.write(mtrans);*/
 				
-				ap_port.write(mtrans);
-			end
-    	end
+					dut2scb_port.write(mtrans);
+				end
+    		end
+		end
 
 		// coverage
 		forever begin
-			@(posedge mif.clk);
+			@(posedge vif.clk);
 			ctrans = uart_trans::type_id::create("ctrans");
-			ctrans.tx_data = mif.tx_data;
-			ctrans.baud_tr = mif.BAUD_RATE;
+			ctrans.tx_data = vif.tx_data;
+			ctrans.baud_tr = vif.BAUD_RATE;
 			if(!is_o_agt)
 				cov_port.write(ctrans);
 		end

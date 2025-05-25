@@ -1,25 +1,22 @@
 class uart_scoreboard extends uvm_scoreboard;
     `uvm_component_utils(uart_scoreboard);
 
-    uvm_blocking_get_port #(uart_trans) a_exp_port; // from env_a model
-    uvm_blocking_get_port #(uart_trans) a_act_port; // from env_b dut rx
-    uart_trans a_expect_queue[$];
-    uart_trans a_actual_queue[$];
+    int dut_num;
 
-    uvm_blocking_get_port #(uart_trans) b_exp_port; // from env_a model
-    uvm_blocking_get_port #(uart_trans) b_act_port; // from env_b dut rx
-    uart_trans b_expect_queue[$];
-    uart_trans b_actual_queue[$];    
+    int tx_compare_cnt, tx_match_cnt, tx_mismatch_cnt;
+    int rx_compare_cnt, rx_match_cnt, rx_mismatch_cnt;
 
-    int a_compare_cnt = 0;
-    int a_match_cnt = 0;
-    int a_mismatch_cnt = 0;
+    // DUT tx vs Driver
+    uvm_blocking_get_port #(uart_trans) tx_port[]; // from i_agt.mon(DUT tx)
+    uvm_blocking_get_port #(uart_trans) drv_port[]; // from i_agt drv
+    uart_trans tx_queue[$], drv_queue[$];
 
-    int b_compare_cnt = 0;
-    int b_match_cnt = 0;
-    int b_mismatch_cnt = 0;
+    // DUT rx vs Model
+    uvm_blocking_get_port #(uart_trans) rx_port[]; // from o_agt.mon(DUT rx)
+    uvm_blocking_get_port #(uart_trans) mdl_port; // from model    
+    uart_trans rx_queue[$], mdl_queue[$];
 
-    function new(string name = "uart_scoreboard", uvm_component parent);
+    function new(string name, uvm_component parent);
         super.new(name, parent);
     endfunction
 
@@ -31,82 +28,89 @@ endclass
 function void uart_scoreboard::build_phase(uvm_phase phase);
     super.build_phase(phase);
 
-    a_exp_port = new("a_exp_port", this);
-    a_act_port = new("a_act_port", this);
+    // get dut amount
+	if(!uvm_config_db #(int)::get(this, "", "dut_num", dut_num))
+		`uvm_fatal("scoreboard", "dut_num must be set!");
 
-    b_exp_port = new("b_exp_port", this);
-    b_act_port = new("b_act_port", this);
+    tx_port = new[dut_num];
+    drv_port = new[dut_num];
+    rx_port = new[dut_num];
+    for(int i = 0; i < dut_num; i++) begin
+        tx_port[i] = new($sformatf("tx_port[%0d]", i), this);
+        drv_port[i] = new($sformatf("drv_port[%0d]", i), this);
+        rx_port[i] = new($sformatf("rx_port[%0d]", i), this);
+    end
+
+    mdl_port = new("mdl_port", this);
 endfunction
 
 task uart_scoreboard::run_phase(uvm_phase phase);
-    uart_trans a_get_expect, a_get_actual, a_tmp_tran;
-    bit a_result;
+    uart_trans tx_expect, tx_actual, tx_tmp_tran;
+    uart_trans rx_expect, rx_actual, rx_tmp_tran;
+    bit tx_result, rx_result;
 
-    uart_trans b_get_expect, b_get_actual, b_tmp_tran;
-    bit b_result;
-
-    // env_a
+    // tx
     fork
-        forever begin
-            a_exp_port.get(a_get_expect); // from model
-            a_expect_queue.push_back(a_get_expect);
-        end
-        forever begin
-            wait(a_expect_queue.size() > 0);
-            a_act_port.get(a_get_actual); // from dut b
-            a_tmp_tran = a_expect_queue.pop_front();
-            //a_result = a_get_actual.compare(a_tmp_tran);
-            if(a_get_actual.rx_data === a_tmp_tran.rx_data)
-                a_result = 1;
-            else
-                a_result = 0;
-                
-            a_compare_cnt++;
+        for(int i = 0; i < dut_num; i++) begin
+            forever begin
+                drv_port[i].get(tx_expect); // from driver
+                drv_queue.push_back(tx_expect);
 
-            if(a_result) begin
-                `uvm_info("uart_scoreboard", "env_a: Compare SUCCESSFULLY", UVM_LOW);
-                $display("Model expect: %0h", a_tmp_tran.rx_data);
-                $display("DUT actual : %0h", a_get_actual.rx_data);
-                a_match_cnt++;
-            end
-            else begin
-                `uvm_error("uart_scoreboard", "env_a: Compare FAILED");
-                $display("the expect data is %0h", a_tmp_tran.rx_data);
-                $display("the actual data is %0h", a_get_actual.rx_data);
-                a_mismatch_cnt++;
+                wait(drv_queue.size() > 0);
+                tx_port[i].get(tx_actual); // from i_agt.mon
+                tx_tmp_tran = drv_queue.pop_front();
+                if(tx_actual.tx_data === tx_tmp_tran.tx_data)
+                    tx_result = 1;
+                else
+                    tx_result = 0;
+
+                tx_compare_cnt++;
+
+                if(tx_result) begin
+                    `uvm_info("uart_scoreboard", $sformatf("env_[%0d]: Compare SUCCESSFULLY", i), UVM_LOW);
+                    $display("env_[%0d] Model expect: %0h", i, tx_tmp_tran.tx_data);
+                    $display("env_[%0d] DUT actual : %0h", i, tx_actual.tx_data);
+                    tx_match_cnt++;
+                end
+                else begin
+                    `uvm_error("uart_scoreboard", $sformatf("env_[%0d]: Compare FAILED", i));
+                    $display("env_[%0d] the expect data is %0h", i, tx_tmp_tran.rx_data);
+                    $display("env_[%0d] the actual data is %0h", i, tx_actual.rx_data);
+                    tx_mismatch_cnt++;
+                end
             end
         end
     join_none
 
-    // env_b
+    // rx
     fork
-        forever begin
-            b_exp_port.get(b_get_expect); // from model
-            b_expect_queue.push_back(b_get_expect);
-        end
-        forever begin
-            wait(b_expect_queue.size() > 0);
-            b_act_port.get(b_get_actual); // from dut a
-            b_tmp_tran = b_expect_queue.pop_front();
-            //b_result = b_get_actual.compare(b_tmp_tran);
-            if(b_get_actual.rx_data === b_tmp_tran.rx_data)
-                b_result = 1;
-            else
-                b_result = 0;
+        for(int i = 0; i < dut_num; i++) begin
+            forever begin
+                mdl_port.get(rx_expect); // from model
+                mdl_queue.push_back(rx_expect);
 
-            b_compare_cnt++;
+                wait(mdl_queue.size() > 0);
+                rx_port[i].get(rx_actual); // from o_agt.mon
+                rx_tmp_tran = mdl_queue.pop_front();
+                if(rx_actual.rx_data === rx_tmp_tran.rx_data)
+                    rx_result = 1;
+                else
+                    rx_result = 0;
 
-            if(b_result) begin
-                `uvm_info("uart_scoreboard", "env_b: Compare SUCCESSFULLY", UVM_LOW);
-                $display("Model expect: %0h", b_tmp_tran.rx_data);
-                $display("DUT actual : %0h", b_get_actual.rx_data);
-                b_match_cnt++;
-            end
-            else begin
-                `uvm_error("uart_scoreboard", "env_b: Compare FAILED");
-                $display("the expect data is %0h", b_tmp_tran.rx_data);
-                $display("the actual data is %0h", b_get_actual.rx_data);
-                b_mismatch_cnt++;
+                rx_compare_cnt++;
+
+                if(rx_result) begin
+                    `uvm_info("uart_scoreboard", $sformatf("env_[%0d]: Compare SUCCESSFULLY", i), UVM_LOW);
+                    $display("env_[%0d] Model expect: %0h", i, rx_tmp_tran.rx_data);
+                    $display("env_[%0d] DUT actual : %0h", i, rx_actual.rx_data);
+                    rx_match_cnt++;
+                end
+                else begin
+                    `uvm_error("uart_scoreboard", $sformatf("env_[%0d]: Compare FAILED", i));
+                    $display("env_[%0d] the expect data is %0h", i, rx_tmp_tran.rx_data);
+                    $display("env_[%0d] the actual data is %0h", i, rx_actual.rx_data);
+                    rx_mismatch_cnt++;
+                end
             end
         end
     join_none
@@ -115,6 +119,6 @@ endtask
 function void uart_scoreboard::report_phase(uvm_phase phase);
     super.report_phase(phase);
 
-    `uvm_info("uart_scoreboard", $sformatf("\nenv_a: Total compare times is: %0d\tMatch count is: %0d\tMismatch count is: %0d", a_compare_cnt, a_match_cnt, a_mismatch_cnt), UVM_LOW);
-    `uvm_info("uart_scoreboard", $sformatf("\nenv_b: Total compare times is: %0d\tMatch count is: %0d\tMismatch count is: %0d", b_compare_cnt, b_match_cnt, b_mismatch_cnt), UVM_LOW);
+    `uvm_info("uart_scoreboard", $sformatf("\ntx: Total compare times is: %0d\tMatch count is: %0d\tMismatch count is: %0d", tx_compare_cnt, tx_match_cnt, tx_mismatch_cnt), UVM_LOW);
+    `uvm_info("uart_scoreboard", $sformatf("\nrx: Total compare times is: %0d\tMatch count is: %0d\tMismatch count is: %0d", rx_compare_cnt, rx_match_cnt, rx_mismatch_cnt), UVM_LOW);
 endfunction

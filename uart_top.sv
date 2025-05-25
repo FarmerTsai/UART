@@ -14,13 +14,14 @@ import uvm_pkg::*;
 `include "uart_model.sv"
 `include "uart_scoreboard.sv"
 `include "uart_coverage.sv"
+`include "uart_env.sv"
 `include "uart_env_a.sv"
 `include "uart_env_b.sv"
-`include "uart_env_top.sv"
+//`include "uart_env_top.sv"
 `include "uart_base_test.sv"
 `include "uart_basic_test.sv"
-`include "uart_corner_test.sv"
-`include "uart_special_test.sv"
+//`include "uart_corner_test.sv"
+//`include "uart_special_test.sv"
 
 module tb_uart_top; 
   
@@ -28,7 +29,7 @@ module tb_uart_top;
   
     uart_if a_if(.clk(clk));
     uart_if b_if(.clk(clk));
-  
+
     uart dut_a(
         .clk(a_if.clk),
         .rst_n(a_if.rst_n),
@@ -83,6 +84,7 @@ module tb_uart_top;
     end*/
 
     initial begin
+        uvm_config_db #(int)::set(null, "*", "dut_num", 2); // test create 2 dut
         uvm_config_db #(virtual uart_if)::set(null, "*", "a_if", a_if);
         uvm_config_db #(virtual uart_if)::set(null, "*", "b_if", b_if);
 
@@ -102,7 +104,7 @@ module tb_uart_top;
 
         
         // start test
-        run_test("uart_special_test");
+        run_test("uart_basic_test");
     end
 
 endmodule

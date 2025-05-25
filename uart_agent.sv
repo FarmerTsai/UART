@@ -35,7 +35,7 @@ class uart_agent extends uvm_agent;
             drv.seq_item_port.connect(sqr.seq_item_export);           
         end
 
-        ap_port = mon.ap_port;
+        //ap_port = mon.ap_port;
     endfunction
 
 endclass
