@@ -26,3 +26,7 @@
 - remove env_top, and create the env based on DUT number
 - i_agt monitor will capture tx signal, including start bit and stop bit
 - o_agt monitor will capture rx input and pass to the model
+
+### 20250526
+- will change to multi env and every env will have independent model, scoreboard
+- DUT will not send data to another DUT
